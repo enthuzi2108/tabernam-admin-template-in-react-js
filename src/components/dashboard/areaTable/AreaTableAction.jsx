@@ -1,9 +1,31 @@
-import { useEffect, useRef, useState } from "react";
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
+import { useEffect, useRef, useState,useContext } from "react";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { Link } from "react-router-dom";
+import { ThemeContext } from "../../../context/ThemeContext";
+import { useStateManager } from "../../../dataProvider/stateManager";
+import { Modal } from "@mui/material";
 
-const AreaTableAction = () => {
+const AreaTableAction = ({rowData}) => {
+
+  const { theme } = useContext(ThemeContext);
+  const buttonColor = theme === "dark" ? "#ffffff" : "#000000";
+  const modalBackgroundColor = theme === "dark" ? "#333333" : "#ffffff";
+  const modalTextColor = theme === "dark" ? "#ffffff" : "#000000";
   const [showDropdown, setShowDropdown] = useState(false);
+  const { countriesData } = useStateManager();
+  const [showModal, setShowModal] = useState(false);
+
+  const handleOpenModal = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+  
+  
   const handleDropdown = () => {
     setShowDropdown(!showDropdown);
   };
@@ -25,34 +47,26 @@ const AreaTableAction = () => {
 
   return (
     <>
-      <button
+       <button
         type="button"
         className="action-dropdown-btn"
-        onClick={handleDropdown}
+        onClick={handleOpenModal}
+        style={{ color: buttonColor }}
       >
         <HiDotsHorizontal size={18} />
-        {showDropdown && (
-          <div className="action-dropdown-menu" ref={dropdownRef}>
-            <ul className="dropdown-menu-list">
-              <li className="dropdown-menu-item">
-                <Link to="/view" className="dropdown-menu-link">
-                  View
-                </Link>
-              </li>
-              <li className="dropdown-menu-item">
-                <Link to="/view" className="dropdown-menu-link">
-                  Edit
-                </Link>
-              </li>
-              <li className="dropdown-menu-item">
-                <Link to="/view" className="dropdown-menu-link">
-                  Delete
-                </Link>
-              </li>
-            </ul>
-          </div>
-        )}
       </button>
+      <Modal open={showModal} onClose={handleCloseModal}>
+        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", backgroundColor: modalBackgroundColor,
+            color: modalTextColor, padding: "20px", borderRadius: "8px" }}>
+          <h3>{rowData.country}</h3>
+          <img src={rowData.countryInfo.flag} alt={rowData.country + " flag"} style={{ width: "100%", height: "auto" }} />
+          <p>Total Cases: {rowData.cases}</p>
+          <p>Total Deaths: {rowData.deaths}</p>
+          <p>Total Recovered: {rowData.recovered}</p>
+          <p>Total Tested: {rowData.tests}</p>
+          {/* Add other country data you want to display */}
+        </div>
+      </Modal>
     </>
   );
 };

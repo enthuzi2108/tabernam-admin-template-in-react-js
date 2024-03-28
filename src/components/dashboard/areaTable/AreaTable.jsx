@@ -1,115 +1,196 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
+import React, { useState, useContext } from "react";
+import { DataGrid } from "@mui/x-data-grid";
 import AreaTableAction from "./AreaTableAction";
-import "./AreaTable.scss";
+import { useStateManager } from "../../../dataProvider/stateManager";
+import { ThemeContext } from "../../../context/ThemeContext";
+import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
+import { createTheme } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
+import { Typography } from "@mui/material";
+
+export const lightTheme = createTheme({
+  palette: {
+    mode: "light",
+  },
+});
+
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+    background: {
+      default: "#2e2e48", // Dark background color for the DataGrid
+    },
+    text: {
+      primary: "#ffffff", // White text color for the DataGrid
+    },
+  },
+  components: {
+    MuiDataGrid: {
+      styleOverrides: {
+        root: {
+          "& .MuiDataGrid-cell": {
+            color: "#ffffff", // Set the text color for cells
+          },
+        },
+      },
+    },
+  },
+  overrides: {
+    MuiDataGridCell: {
+      root: {
+        "&.MuiDataGrid-cell--actions": {
+          color: "#ffffff", // White text color for action column
+          "& .MuiIconButton-label": {
+            color: "#ffffff !important", // Icon color for action column
+          },
+        },
+      },
+    },
+  },
+});  
 
 const TABLE_HEADS = [
-  "Products",
-  "Order ID",
-  "Date",
-  "Customer name",
-  "Status",
-  "Amount",
-  "Action",
+  { field: "country", headerName: "Country", width: 200 },
+  { field: "cases", headerName: "Confirmed", width: 150 },
+  { field: "recovered", headerName: "Recovered", width: 150 },
+  { field: "tests", headerName: "Tested", width: 150 },
+  { field: "deaths", headerName: "Deaths", width: 150 },
+  {
+    field: "activePerOneMillion",
+    headerName: "Active Per Million",
+    width: 200,
+  },
+  { field: "casesPerOneMillion", headerName: "Cases Per Million", width: 200 },
+  {
+    field: "criticalPerOneMillion",
+    headerName: "Critical Per Million",
+    width: 200,
+  },
+  {
+    field: "deathsPerOneMillion",
+    headerName: "Deaths Per Million",
+    width: 200,
+  },
+  {
+    field: "action",
+    headerName: "Action",
+    sortable: false,
+    width: 150,
+    renderCell: (params) => (
+      <AreaTableAction
+        theme={params.theme}
+        rowData={params.row}
+        onClick={() => handleActionFilter(params)}
+      />
+    ),
+  },
 ];
 
-const TABLE_DATA = [
-  {
-    id: 100,
-    name: "Iphone 13 Pro",
-    order_id: 11232,
-    date: "Jun 29,2022",
-    customer: "Afaq Karim",
-    status: "delivered",
-    amount: 400,
-  },
-  {
-    id: 101,
-    name: "Macbook Pro",
-    order_id: 11232,
-    date: "Jun 29,2022",
-    customer: "Afaq Karim",
-    status: "pending",
-    amount: 288,
-  },
-  {
-    id: 102,
-    name: "Apple Watch",
-    order_id: 11232,
-    date: "Jun 29,2022",
-    customer: "Afaq Karim",
-    status: "canceled",
-    amount: 500,
-  },
-  {
-    id: 103,
-    name: "Microsoft Book",
-    order_id: 11232,
-    date: "Jun 29,2022",
-    customer: "Afaq Karim",
-    status: "delivered",
-    amount: 100,
-  },
-  {
-    id: 104,
-    name: "Apple Pen",
-    order_id: 11232,
-    date: "Jun 29,2022",
-    customer: "Afaq Karim",
-    status: "delivered",
-    amount: 60,
-  },
-  {
-    id: 105,
-    name: "Airpods",
-    order_id: 11232,
-    date: "Jun 29,2022",
-    customer: "Afaq Karim",
-    status: "delivered",
-    amount: 80,
-  },
-];
+const ROWS_PER_PAGE = 20;
 
 const AreaTable = () => {
+  const { countriesData } = useStateManager();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [numericFilter, setNumericFilter] = useState(null);
+  const { theme } = useContext(ThemeContext);
+
+  const appliedTheme = theme === "dark" ? darkTheme : lightTheme;
+
+  const totalPages = Math.ceil(countriesData.length / ROWS_PER_PAGE);
+
+  const filteredData = countriesData.filter((country) => {
+    // Filter by country name
+    const nameMatch = country.country
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    // Filter by numeric value
+    const numericMatch =
+      numericFilter === null || country.cases === numericFilter;
+    return nameMatch && numericMatch;
+  });
+
+  const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+  const endIndex = startIndex + ROWS_PER_PAGE;
+  const slicedData = filteredData.slice(startIndex, endIndex);
+
+  const handleChangePage = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleActionFilter = (params) => {
+    // Filter by numeric value in action column
+    const numericValue = parseFloat(params.row.cases);
+    setNumericFilter(isNaN(numericValue) ? null : numericValue);
+  };
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  //   const getRowClassName = (params) => {
+  //     console.log("Row index:", params.api.getRowIndex(params.row));
+  //     return params.api.getRowIndex(params.row) % 2 === 0 ? 'alternate-row' : '';
+  // };
+
   return (
-    <section className="content-area-table">
-      <div className="data-table-info">
-        <h4 className="data-table-title">Latest Orders</h4>
+    <MuiThemeProvider theme={appliedTheme}>
+      <div style={{ width: "100%" }}>
+        <div style={{ overflowX: "auto" }}>
+          <div style={{ minWidth: 1200 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "16px",
+              }}
+            >
+              <TextField
+                type="text"
+                placeholder="Search by country name"
+                value={searchQuery}
+                onChange={handleSearch}
+                variant="filled"
+                margin="normal"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+              {/* <Typography variant="h4" component="h2" style={{ marginLeft: "10rem",fontSize:'2rem' }}>Countrywise Data</Typography> */}
+            </div>
+
+            <DataGrid
+              rows={slicedData}
+              columns={TABLE_HEADS}
+              pagination
+              pageSize={ROWS_PER_PAGE}
+              rowCount={filteredData.length}
+              paginationMode="server"
+              autoHeight={true}
+              page={currentPage - 1}
+              onPageChange={(newPage) => handleChangePage(newPage + 1)}
+              getRowClassName={(params) =>
+                params.indexRelativeToCurrentPage % 2 === 0
+                  ? "Mui-even"
+                  : "Mui-odd"
+              }
+              sx={{
+                "& .MuiDataGrid-row": {
+                  "&:nth-of-type(odd)": {
+                    // backgroundColor: 'lightblue', // Change to your desired background color for odd rows
+                  },
+                  "&:nth-of-type(even)": {
+                    backgroundColor: "gray", // Change to your desired background color for even rows
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
       </div>
-      <div className="data-table-diagram">
-        <table>
-          <thead>
-            <tr>
-              {TABLE_HEADS?.map((th, index) => (
-                <th key={index}>{th}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {TABLE_DATA?.map((dataItem) => {
-              return (
-                <tr key={dataItem.id}>
-                  <td>{dataItem.name}</td>
-                  <td>{dataItem.order_id}</td>
-                  <td>{dataItem.date}</td>
-                  <td>{dataItem.customer}</td>
-                  <td>
-                    <div className="dt-status">
-                      <span
-                        className={`dt-status-dot dot-${dataItem.status}`}
-                      ></span>
-                      <span className="dt-status-text">{dataItem.status}</span>
-                    </div>
-                  </td>
-                  <td>${dataItem.amount.toFixed(2)}</td>
-                  <td className="dt-cell-action">
-                    <AreaTableAction />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </section>
+    </MuiThemeProvider>
   );
 };
 

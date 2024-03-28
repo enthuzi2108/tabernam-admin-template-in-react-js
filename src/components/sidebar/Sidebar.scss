@@ -75,6 +75,14 @@
     }
   }
 
+//   .sidebar-open-btn {
+//     display: inline-flex; /* Ensure the hamburger menu button is always visible */
+//     @media(min-width: 769px){
+//         display: none; /* Hide the button on larger screens where sidebar is always visible */
+//     }
+//     /* Other styles for the button */
+// }
+
   .sidebar-close-btn{
     background-color: var(--toggle-btn-bg-color);
     width: 28px;
@@ -152,7 +160,7 @@
     }
   }
 
-  .mennu-link-icon{
+  .menu-link-icon{
     display: flex;
     align-items: center;
   }
@@ -174,6 +182,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    width: 85%;
   }
 
   .sidebar-menu2{

@@ -12,7 +12,7 @@ const AreaCard = ({ colors, percentFillValue, cardInfo }) => {
 
   const data = [
     { name: "Remained", value: remainedValue },
-    { name: "Achieved Sales", value: filledValue },
+    { name: "Total Cases", value: filledValue },
   ];
 
   const renderTooltipContent = (value) => {

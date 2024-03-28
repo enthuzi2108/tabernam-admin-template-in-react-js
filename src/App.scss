@@ -134,13 +134,15 @@ ul {
   background-color: var(--background-color);
   min-height: 100vh;
   overflow: hidden;
+  margin-bottom: -20px;
 }
 
 .content-wrapper {
   background-color: var(--background-color);
   min-height: 100vh;
-  padding: 50px 58px;
+  padding: 20px;
   margin-left: 260px;
+  
 
   @media (max-width: 1400px) {
     padding: 32px;

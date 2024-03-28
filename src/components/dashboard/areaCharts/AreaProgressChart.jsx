@@ -1,36 +1,44 @@
-const data = [
-  {
-    id: 1,
-    name: "Jeans",
-    percentValues: 70,
-  },
-  {
-    id: 2,
-    name: "Shirts",
-    percentValues: 40,
-  },
-  {
-    id: 3,
-    name: "Belts",
-    percentValues: 60,
-  },
-  {
-    id: 4,
-    name: "Caps",
-    percentValues: 80,
-  },
-  {
-    id: 5,
-    name: "Others",
-    percentValues: 20,
-  },
-];
+
+// import { ThemeContext } from "../../../context/ThemeContext";
+// import { LIGHT_THEME } from "../../../constants/themeConstants";
+import "./AreaCharts.scss";
+import { useStateManager } from "../../../dataProvider/stateManager";
 
 const AreaProgressChart = () => {
+  const { totals } = useStateManager();
+
+  const data = [
+    {
+      id: 1,
+      name: "Active Per Million",
+      percentValues: Math.ceil((totals.activePerMillion / 1000000000) * 1000),
+    },
+    {
+      id: 2,
+      name: "Cases Per Million",
+      percentValues: Math.ceil((totals.casesPerMillion/ 1000000000) * 1000),
+    },
+    {
+      id: 3,
+      name: "Critical Per Million",
+      percentValues: Math.ceil((totals.criticalPerMillion/ 10000) * 1000),
+    },
+    {
+      id: 4,
+      name: "Deaths Per Million",
+      percentValues: Math.ceil((totals.deathsPerMillion/ 10000000) * 1000),
+    },
+    {
+      id: 5,
+      name: "Tests Per Million",
+      percentValues: Math.ceil((totals.deathsPerMillion/ 10000000) * 1000),
+    },
+  ];
+
   return (
     <div className="progress-bar">
       <div className="progress-bar-info">
-        <h4 className="progress-bar-title">Most Sold Items</h4>
+        <h4 className="progress-bar-title">COVID-19 Statistics Per Million</h4>
       </div>
       <div className="progress-bar-list">
         {data?.map((progressbar) => {
